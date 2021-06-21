@@ -8,12 +8,14 @@
 #+LANGUAGE: en
 #+PROPERTY: results silent
 
-* Begin the Beguine
+* Begin at the begining
 I want any customizations to be stored in a file in this repository.
 By loading this file first, I can override any customized setting by defining it in this file.
 
 #+begin_src emacs-lisp
-  (load (concat user-emacs-directory "custom.el"))
+  (setq user/custom-file (expand-file-name "custom.el" user-emacs-directory))
+  (when (file-exists-p user/custom-file)
+    (load user/custom-file))
 #+end_src
 
 I want a quick way to open the config file =emacs-config.org=, so I have added it's own keybinding.
@@ -30,31 +32,60 @@ I want a quick way to open the config file =emacs-config.org=, so I have added i
 Toggle off the welcome startup screen.
 
 #+begin_src emacs-lisp
-  (custom-set-variables
-   '(inhibit-startup-screen t))
+  (setq inhibit-splash-screen t)
+  (blink-cursor-mode -1)
+  (column-number-mode t)
+  (show-paren-mode t)
+  (tool-bar-mode -1)
 #+end_src
 
 * Package Mangement
+  
 Get the package management system up and running
 
 #+begin_src emacs-lisp
-;; Add MELPA package server
-(require 'package)
+;; Need to load
+(if (version< emacs-version "27")
+  (package-initialize))
 
-(add-to-list 'package-archives
-  '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
 
-(unless package-archive-contents
-  (package-refresh-contents))
+;; Set explicit priorities (gnu is the default package-archive)
+(setq package-archive-priorities '(("org" . 4)
+                                   ("melpa" . 3)
+                                   ("melpa-stable" . 2)
+                                   ("gnu" . 1)))
 
-(package-initialize)
-
-;; Install package use-package
-(unless (package-installed-p 'use-package)
+(unless (package-installed-p 'use-package) ; Bootstrap use-package
+  (message "Use package needs to be installed")
+  (package-refresh-contents)
   (package-install 'use-package))
+
 #+end_src
 
-** EVIL
+Install the =use-package= package
+
+#+begin_src emacs-lisp
+;; Use-package can now be used for itself
+(use-package use-package
+  :init
+  (setq use-package-always-ensure t)  ; Try installing automatically
+  (setq use-package-verbose nil)              ; Set to true when interested in load times
+  ;; If running as daemon, there's no reason to defer,just load shite
+  ;; to minimize chance of lockup, but it still happens sometimes.
+  (if (daemonp)
+      (setq use-package-always-demand t))
+
+  (use-package use-package-ensure-system-package :ensure t)   ; Need this because we are in use-package config
+
+  ;; Location where I keep custom packages
+  (setq custom-package-directory (concat user-emacs-directory "lisp/")))
+#+end_src
+
+* Packages
+** Vim emulation
 I use the EVIL package to provide vim keybindings in emacs.
 
 #+begin_src emacs-lisp

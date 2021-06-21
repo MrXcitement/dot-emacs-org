@@ -23,7 +23,7 @@ anything-c-adaptive-history
 ede-projects.el
 wget-log
 abbrev_defs
-config.el
+home/.emacs.d/emacs-config.el
 home/.emacs.d/eshell/history
 home/.emacs.d/eshell/lastdir
 home/.emacs.d/ido.last
