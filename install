@@ -58,5 +58,5 @@ link_glob() {
 # Backup existing files and link files/dirs in the home folder into
 # the users home directory.
 pushd ./home > /dev/null
-link_glob ".emacs.d/*" "${HOME}"
+link_glob ".emacs.d" "${HOME}"
 popd > /dev/null
