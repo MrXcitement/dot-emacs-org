@@ -1,26 +1,65 @@
+-*- mode: org; fill-column: 80; -*-
 #+TITLE: Emacs configuration
 #+AUTHOR: Mike Barker
 #+EMAIL: mike@thebarkers.com
+#+DATE: Time-stamp:
+#+BABEL: :cache yes
 #+DESCRIPTION: An org-babel based emacs configuration
 #+LANGUAGE: en
 #+PROPERTY: results silent
+
+* Begin the Beguine
+I want any customizations to be stored in a file in this repository.
+By loading this file first, I can override any customized setting by defining it in this file.
+
+#+begin_src emacs-lisp
+  (load (concat user-emacs-directory "custom.el"))
+#+end_src
+
+I want a quick way to open the config file =emacs-config.org=, so I have added it's own keybinding.
+#+begin_src emacs-lisp
+  (defun user/open-emacs-config ()
+    (interactive)
+    (find-file user/emacs-config-file))
+  ;; I wanted something with '~'
+  (global-set-key (kbd "C-~") 'user/open-emacs-config)
+#+end_src
 
 * UI Settings
 ** Remove startup welcome screen
 Toggle off the welcome startup screen.
 
-#+BEGIN_SRC emacs-lisp
-(custom-set-variables
-  '(inhibit-startup-screen t))
-#+END_SRC
+#+begin_src emacs-lisp
+  (custom-set-variables
+   '(inhibit-startup-screen t))
+#+end_src
 
-* Packages
+* Package Mangement
+Get the package management system up and running
+
+#+begin_src emacs-lisp
+;; Add MELPA package server
+(require 'package)
+
+(add-to-list 'package-archives
+  '("melpa" . "https://melpa.org/packages/") t)
+
+(unless package-archive-contents
+  (package-refresh-contents))
+
+(package-initialize)
+
+;; Install package use-package
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+#+end_src
+
 ** EVIL
-Install EVIL and enable it
+I use the EVIL package to provide vim keybindings in emacs.
 
-#+BEGIN_SRC emacs-lisp
-(use-package evil
-  :ensure t
-  :config
-  (evil-mode 1))
-#+END_SRC
+#+begin_src emacs-lisp
+  (use-package evil
+    :ensure t
+    :config
+    (evil-mode 1))
+#+end_src
