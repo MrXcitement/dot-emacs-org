@@ -28,8 +28,8 @@ I want a quick way to open the config file =emacs-config.org=, so I have added i
 #+end_src
 
 * UI Settings
-** Remove startup welcome screen
-Toggle off the welcome startup screen.
+** General UI settings
+Toggle off the welcome startup screen. Disable blinking cursor. Show the column number to the mode line. Higlight matching parenthises. Hide the toolbar.
 
 #+begin_src emacs-lisp
   (setq inhibit-splash-screen t)
@@ -37,6 +37,53 @@ Toggle off the welcome startup screen.
   (column-number-mode t)
   (show-paren-mode t)
   (tool-bar-mode -1)
+#+end_src
+
+** Whitespace
+#+begin_src emacs-lisp
+  (setq whitespace-line-column 80 whitespace-style
+	'(face newline space-mark tab-mark newline-mark trailing lines-tail))
+#+end_src
+
+** GUI/TUI settings
+*** Any OS
+#+begin_src emacs-lisp
+  (when (window-system)
+    (defun user/toggle-fullscreen ()
+      "Toggle full screen"
+      (interactive)
+      (set-frame-parameter
+       nil 'fullscreen
+       (when (not (frame-parameter nil 'fullscreen)) 'fullboth)))
+    (global-set-key [f11] 'user/toggle-fullscreen))
+  (unless (window-system)
+    (menu-bar-mode -1)
+    ;; on xterm's remap the select key to shift-up
+    (if (string-match-p "xterm" (tty-type))
+	(define-key input-decode-map "\e[1;2A" [S-up])))
+#+end_src
+
+*** Darwin (macOS)
+#+begin_src emacs-lisp
+  (when (eq system-type 'darwin)
+    (when (window-system)
+      (global-set-key (kbd "s-<return>") 'user/toggle-fullscreen)
+      (when (member "FiraCode Nerd Font" (font-family-list))
+	(set-frame-font "FiraCode Nerd Font" t t))))
+#+end_src
+*** Linux
+#+begin_src emacs-lisp
+  (when (eq system-type 'gnu/linux)
+    (when (window-system)
+      (when (member "Monospace" (font-family-list))
+	(set-face-font 'default "Monospace 11"))))
+#+end_src
+*** Windows
+#+begin_src emacs-lisp
+  (when (eq system-type 'windows-nt)
+    (when (window-system)
+      (when (member "Lucida Console" (font-family-list))
+	(set-face-font 'default "Lucida Console 10"))))
 #+end_src
 
 * Package Mangement
