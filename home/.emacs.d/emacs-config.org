@@ -9,6 +9,7 @@
 #+PROPERTY: results silent
 
 * Begin at the begining
+** Customizations
 I want any customizations to be stored in a file in this repository.
 By loading this file first, I can override any customized setting by defining it in this file.
 
@@ -25,6 +26,44 @@ I want a quick way to open the config file =emacs-config.org=, so I have added i
     (find-file user/emacs-config-file))
   ;; I wanted something with '~'
   (global-set-key (kbd "C-~") 'user/open-emacs-config)
+#+end_src
+
+** Environment
+*** Darwin
+Setup darwin (mac os x) environment setup here...
+#+begin_src emacs-lisp
+  (when (eq system-type 'darwin)
+    ;; Setup the path.
+    ;; (let ((mypaths '("~/bin"
+    ;; 		     "/usr/local/bin"
+    ;; 		     "/usr/local/sbin"
+    ;; 		     "/usr/bin"
+    ;; 		     "/usr/sbin"
+    ;; 		     "/bin"
+    ;; 		     "/sbin")))
+    ;;   (setenv "PATH" (mapconcat 'identity mypaths ":"))
+    ;;   (setq exec-path mypaths))
+
+    ;; Force the current directory to be the users home dir
+    (setq default-directory "~/")
+
+    ;; Use the provided elisp version of ls
+    (require 'ls-lisp)
+    (setq ls-lisp-use-insert-directory-program nil))
+#+end_src
+
+*** Linux
+
+Setup linux environment here...
+#+begin_src emacs-lisp
+  (when (eq system-type 'linux))
+#+end_src
+
+*** Windows
+
+Setup window environment here...
+#+begin_src emacs-lisp
+  (when (eq system-type 'windows-nt))
 #+end_src
 
 * UI Settings
