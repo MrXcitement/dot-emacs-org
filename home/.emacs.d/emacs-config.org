@@ -76,6 +76,8 @@ Install the =use-package= package
 #+end_src
 
 * Packages
+  (use-package benchmark-init
+
 ** Get environment from shell
 #+begin_src emacs-lisp
   (when (and (display-graphic-p) (eq system-type 'darwin))
