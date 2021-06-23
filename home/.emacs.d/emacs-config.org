@@ -76,8 +76,16 @@ Install the =use-package= package
 #+end_src
 
 * Packages
+** Benchmark startup
+=benchmark-init= package records startup time by package.
+#+begin_src emacs-lisp
   (use-package benchmark-init
+    :config
+    (add-hook 'after-init-hook 'benchmark-init/deactivate))
 
+  (add-hook 'after-init-hook
+	    (lambda () (message "Loaded emacs config in %s" (emacs-init-time))))
+#+end_src
 ** Get environment from shell
 #+begin_src emacs-lisp
   (when (and (display-graphic-p) (eq system-type 'darwin))
