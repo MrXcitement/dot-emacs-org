@@ -6,6 +6,7 @@ elpy/
 site-lisp/
 semanticdb/
 server/
+straight/
 transient/
 tutorial/
 url/
