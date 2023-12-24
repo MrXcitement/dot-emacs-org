@@ -1,0 +1,25 @@
+
+# Aliases for emacs commands
+alias di dired $1
+alias diow dired-other-window $1
+alias ef ediff-files $*
+alias ff find-file $1
+alias ffof find-file-other-frame $1
+alias ffow find-file-other-window $1
+alias ms magit-status $1
+
+# Aliasing standard shell commands to better emacs alternatives
+alias less view-file $1
+alias git git --no-pager $*
+
+# List files
+alias l  ls -lah $*
+alias la ls -lAh $*
+alias ll ls -lh $*
+alias ls ls -G $*
+alias lsa ls -lah $*
+
+# Confirm before overwriting something
+#alias cp cp -i $*
+alias mv mv -i $1
+alias rm rm -i $1
