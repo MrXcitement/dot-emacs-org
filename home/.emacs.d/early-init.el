@@ -23,8 +23,8 @@
 ;; Increase GC threshold during startup to 50MB
 (setq gc-cons-threshold (* 50 1000 1000))
 
-;; Elpaca package manager requires the default package manager to be turned off
-;; (setq package-enable-at-startup nil)
+;; Straight package manager requires the default package manager to be turned off
+(setq package-enable-at-startup nil)
 
 ;; Turn off ui elements
 (setq inhibit-splash-screen t)

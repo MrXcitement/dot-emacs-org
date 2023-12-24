@@ -53,18 +53,37 @@
 
 * Package Management
 ** package
+I am using the *straight* package manager instead of the default emacs
+*pacakge.el* package manager.
+
 Emacs is extended by implementing additional features in packages,
 which are Emacs Lisp libraries. These could be written by you or
 provided by someone else.
 
 https://www.gnu.org/software/emacs/manual/html_node/emacs/Packages.html
+
+Next-generation, purely functional package manager for the Emacs hacker.
+
+https://github.com/radian-software/straight.el
 #+begin_src emacs-lisp
-;; Set up package repositories.
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") 'append)
-(setopt package-install-upgrade-built-in t
-        package-native-compile t
-        native-comp-async-report-warnings-errors nil)
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+;; Force use-package to use straight.el to automatically install missing packages
+(setq straight-use-package-by-default t)
 #+end_src
 
 ** use-package macro
@@ -79,9 +98,6 @@ https://www.gnu.org/software/emacs/manual/html_mono/use-package.html
 (setopt use-package-always-ensure t       ; :ensure t  by default
         use-package-always-defer  t)      ; :defer  t  by default
 
-;; https://github.com/slotThe/vc-use-package
-(unless (package-installed-p 'vc-use-package)
-  (package-vc-install "https://github.com/slotThe/vc-use-package"))
 #+end_src
 
 * Packages
@@ -105,7 +121,7 @@ https://github.com/emacsmirror/buffer-move
 #+begin_src emacs-lisp
 ;; (elpaca (buffer-move :host github :repo "emacsmirror/buffer-move"))
 (use-package buffer-move
-  :vc (:fetcher github :repo emacsmirror/buffer-move))
+  :straight buffer-move)
 #+end_src
 
 ** company
