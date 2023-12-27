@@ -82,8 +82,6 @@ https://github.com/radian-software/straight.el
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-;; Force use-package to use straight.el to automatically install missing packages
-(setq straight-use-package-by-default t)
 #+end_src
 
 ** use-package macro
@@ -92,12 +90,14 @@ your init file in a declarative way.
 
 https://www.gnu.org/software/emacs/manual/html_mono/use-package.html
 #+begin_src emacs-lisp
-;; Initial `use-package' configuration.
-(setopt use-package-enable-imenu-support t)
-(require 'use-package)
-(setopt use-package-always-ensure t       ; :ensure t  by default
-        use-package-always-defer  t)      ; :defer  t  by default
-
+  ;; Initial `use-package' configuration.
+  ;; Force use-package to use straight.el to automatically install missing packages
+  (setq straight-use-package-by-default t)
+  (setq use-package-enable-imenu-support t)
+  (straight-use-package 'use-package)
+  (require 'use-package)
+  (setq use-package-always-ensure t)       ; :ensure t  by default
+  (setq use-package-always-defer  t)       ; :defer  t  by default
 #+end_src
 
 * Packages
