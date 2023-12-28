@@ -6,8 +6,8 @@
 
 * Table of Contents :toc:
 - [[#package-management][Package Management]]
-  - [[#package][package]]
-  - [[#use-package-macro][use-package macro]]
+  - [[#straight][straight]]
+  - [[#use-package][use-package]]
 - [[#packages][Packages]]
   - [[#all-the-icons][all-the-icons]]
   - [[#buffer-move-emacsmirror][buffer-move (emacsmirror)]]
@@ -15,9 +15,11 @@
   - [[#counsel-ivy-and-swipper][counsel, ivy and swipper]]
   - [[#dashboard][dashboard]]
   - [[#diminish][diminish]]
-  - [[#dired][dired]]
+  - [[#dired-open-peek-dired][dired-open, peek-dired]]
   - [[#eshell-syntax-highlighting][eshell-syntax-highlighting]]
-  - [[#evil-evil-collection-evil-tutor][evil, evil-collection, evil-tutor]]
+  - [[#evil][evil]]
+  - [[#evil-org-mode][evil-org-mode]]
+  - [[#evil-tutor][evil-tutor]]
   - [[#flycheck][flycheck]]
   - [[#general][general]]
   - [[#git-timemachine][git-timemachine]]
@@ -36,23 +38,21 @@
   - [[#which-key][which-key]]
 - [[#emacs-settings][Emacs Settings]]
   - [[#customize][Customize]]
-  - [[#dired-1][Dired]]
+  - [[#defaults][Defaults]]
+  - [[#dired][Dired]]
   - [[#environment][Environment]]
   - [[#eshell][Eshell]]
   - [[#lock-buffers][Lock Buffers]]
   - [[#backup][Backup]]
+  - [[#org-mode][Org Mode]]
   - [[#server][Server]]
   - [[#spelling][Spelling]]
   - [[#theme][Theme]]
   - [[#ui][UI]]
   - [[#zoom-text-inout][Zoom Text In/Out]]
-- [[#org-mode][Org Mode]]
-  - [[#disable-electric-indent][Disable Electric Indent]]
-  - [[#fix-formatting-in-src-blocks][Fix formatting in src blocks]]
-  - [[#structure-templates][Structure Templates]]
 
 * Package Management
-** package
+** straight
 I am using the *straight* package manager instead of the default emacs
 *pacakge.el* package manager.
 
@@ -84,20 +84,26 @@ https://github.com/radian-software/straight.el
 
 #+end_src
 
-** use-package macro
+** use-package
 The use-package macro allows you to set up package customization in
 your init file in a declarative way.
 
 https://www.gnu.org/software/emacs/manual/html_mono/use-package.html
 #+begin_src emacs-lisp
-  ;; Initial `use-package' configuration.
-  ;; Force use-package to use straight.el to automatically install missing packages
-  (setq straight-use-package-by-default t)
-  (setq use-package-enable-imenu-support t)
-  (straight-use-package 'use-package)
-  (require 'use-package)
-  (setq use-package-always-ensure t)       ; :ensure t  by default
-  (setq use-package-always-defer  t)       ; :defer  t  by default
+;; Use straight to 'install' use-package
+(straight-use-package 'use-package)
+
+;; Force use-package to use straight.el to automatically install missing packages
+(setq straight-use-package-by-default t)
+
+;; Initial `use-package' configuration.
+(setq-default use-package-always-defer  t        ; Always defer loading package
+              use-package-always-ensure t        ; Install package if not installed
+              use-package-enable-imenu-support t ; Let imenu find use-package definitions
+              use-package-expand-minimally t     ; expand code is as minimal as possible
+              use-package-verbose nil)           ; Don't report loading details
+
+(require 'use-package)
 #+end_src
 
 * Packages
@@ -226,13 +232,10 @@ https://github.com/emacsmirror/diminish
 (use-package diminish)
 #+end_src
 
-** dired
-Dired mode extra packages
-+ dired-open - This package adds a mechanism to add "hooks" to dired-find-file that will run before emacs tries its own mechanisms to open the file, thus enabling you to launch other application or code and suspend the default behaviour.
-  https://github.com/Fuco1/dired-hacks
-+ peek-dired - =archived= This is a minor mode that can be enabled from a dired buffer. Once enabled it will show the file from point in the other window.
-  https://github.com/asok/peep-dired
+** dired-open, peek-dired
+dired-open - This package adds a mechanism to add "hooks" to dired-find-file that will run before emacs tries its own mechanisms to open the file, thus enabling you to launch other application or code and suspend the default behaviour.
 
+https://github.com/Fuco1/dired-hacks
 #+begin_src emacs-lisp
 (use-package dired-open
   :config
@@ -243,8 +246,15 @@ Dired mode extra packages
                                 ("mkv" . "open")
                                 ("mp4" . "open"))))
 
+
+#+end_src
+
+peek-dired - =archived= This is a minor mode that can be enabled from a dired buffer. Once enabled it will show the file from point in the other window.
+
+https://github.com/asok/peep-dired
+#+begin_src emacs-lisp
 (use-package peep-dired
-  :after dired
+  :after (dired evil)
   :hook (evil-normalize-keymaps . peep-dired-hook)
   :config
     (evil-define-key 'normal dired-mode-map (kbd "h") 'dired-up-directory)
@@ -252,10 +262,8 @@ Dired mode extra packages
     (evil-define-key 'normal peep-dired-mode-map (kbd "j") 'peep-dired-next-file)
     (evil-define-key 'normal peep-dired-mode-map (kbd "k") 'peep-dired-prev-file)
 )
-
 ;;(add-hook 'peep-dired-hook 'evil-normalize-keymaps)
-
-#+end_src
+#+end_src 
 
 ** eshell-syntax-highlighting
 This package adds syntax highlighting to the Emacs Eshell. It
@@ -270,7 +278,7 @@ https://github.com/akreisher/eshell-syntax-highlighting
   (eshell-syntax-highlighting-global-mode +1))
 #+end_src
 
-** evil, evil-collection, evil-tutor
+** evil
 Evil is an extensible vi/vim layer for Emacs. Because...let's face
 it. The Vim keybindings are just plain better.
 
@@ -283,18 +291,38 @@ https://github.com/emacs-evil/evil
   (setq evil-vsplit-window-right t)
   (setq evil-split-window-below t)
   (setq evil-want-C-u-scroll t)
-  (evil-mode)
+  (evil-mode 1)
   :config
   (bind-keys
    :map evil-motion-state-map
    ((kbd "RET") . nil)))
+#+end_src
 
-(use-package evil-collection
-  :after evil
+** evil-org-mode
+Supplemental evil-mode keybindings to emacs org-mode 
+
+https://github.com/Somelauw/evil-org-mode
+#+begin_src emacs-lisp
+;; (require 'evil-org)
+;; (add-hook 'org-mode-hook 'evil-org-mode)
+;; (evil-org-set-key-theme '(navigation insert textobjects additional calendar))
+;; (require 'evil-org-agenda)
+;; (evil-org-agenda-set-keys)
+(use-package evil-org
+  :after (org evil)
+  :diminish
+  :hook (org-mode . evil-org-mode)
   :config
-  (setq evil-collection-mode-list '(dashboard dired ibuffer))
-  (evil-collection-init))
+  (evil-org-set-key-theme)
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+#+end_src
 
+** evil-tutor
+Vimtutor adapted to Emacs+Evil and wrapped in a major mode. 
+
+https://github.com/syl20bnr/evil-tutor
+#+begin_src emacs-lisp
 (use-package evil-tutor)
 #+end_src
 
@@ -742,6 +770,19 @@ Set the `custom' file and location.
 (load custom-file 'noerror)
 #+end_src
 
+** Defaults 
+In confirmation dialogs, we want to be able to type y and n instead of
+having to spell the whole words
+#+begin_src emacs-lisp
+(defalias 'yes-or-no-p 'y-or-n-p)
+#+end_src
+
+Use spaces, but configure tab-width for modes that require tabs
+#+begin_src emacs-lisp
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
+#+end_src
+
 ** Dired
 Highlight the current line when in dired mode.
 
@@ -814,6 +855,42 @@ Configure the eshell mode
           (,tramp-file-name-regexp nil))))
 #+end_src
 
+** Org Mode
+*** Disable Electric Indent
+By disabling electric mode, formating of emacs-lisp is not wonky!?
+
+#+begin_src emacs-lisp
+(electric-indent-mode -1)
+#+end_src
+
+*** Fix formatting in src blocks
+#+begin_src emacs-lisp
+(setq org-src-tab-acts-natively t)
+(setq org-edit-src-content-indentation 0)
+#+end_src
+
+*** Structure Templates
+Org-tempo is not a separate package but a module within org that can
+be enabled.  Org-tempo allows for '<s' followed by TAB to expand to a
+begin_src tag.  Other expansions available include:
+
+| Typing the below + TAB | Expands to ...                          |
+|------------------------+-----------------------------------------|
+| <a                     | '#+BEGIN_EXPORT ascii' … '#+END_EXPORT  |
+| <c                     | '#+BEGIN_CENTER' … '#+END_CENTER'       |
+| <C                     | '#+BEGIN_COMMENT' … '#+END_COMMENT'     |
+| <e                     | '#+BEGIN_EXAMPLE' … '#+END_EXAMPLE'     |
+| <E                     | '#+BEGIN_EXPORT' … '#+END_EXPORT'       |
+| <h                     | '#+BEGIN_EXPORT html' … '#+END_EXPORT'  |
+| <l                     | '#+BEGIN_EXPORT latex' … '#+END_EXPORT' |
+| <q                     | '#+BEGIN_QUOTE' … '#+END_QUOTE'         |
+| <s                     | '#+BEGIN_SRC' … '#+END_SRC'             |
+| <v                     | '#+BEGIN_VERSE' … '#+END_VERSE'         |
+
+https://orgmode.org/manual/Structure-Templates.html
+#+begin_src emacs-lisp
+(require 'org-tempo)
+#+end_src
 ** Server
 #+begin_src emacs-lisp
 ;; Darwin (Mac OS X)
@@ -1042,39 +1119,3 @@ Configure the eshell mode
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 #+end_src
 
-* Org Mode
-** Disable Electric Indent
-By disabling electric mode, formating of emacs-lisp is not wonky!?
-
-#+begin_src emacs-lisp
-(electric-indent-mode -1)
-#+end_src
-
-** Fix formatting in src blocks
-#+begin_src emacs-lisp
-(setq org-src-tab-acts-natively t)
-(setq org-edit-src-content-indentation 0)
-#+end_src
-
-** Structure Templates
-Org-tempo is not a separate package but a module within org that can
-be enabled.  Org-tempo allows for '<s' followed by TAB to expand to a
-begin_src tag.  Other expansions available include:
-
-| Typing the below + TAB | Expands to ...                          |
-|------------------------+-----------------------------------------|
-| <a                     | '#+BEGIN_EXPORT ascii' … '#+END_EXPORT  |
-| <c                     | '#+BEGIN_CENTER' … '#+END_CENTER'       |
-| <C                     | '#+BEGIN_COMMENT' … '#+END_COMMENT'     |
-| <e                     | '#+BEGIN_EXAMPLE' … '#+END_EXAMPLE'     |
-| <E                     | '#+BEGIN_EXPORT' … '#+END_EXPORT'       |
-| <h                     | '#+BEGIN_EXPORT html' … '#+END_EXPORT'  |
-| <l                     | '#+BEGIN_EXPORT latex' … '#+END_EXPORT' |
-| <q                     | '#+BEGIN_QUOTE' … '#+END_QUOTE'         |
-| <s                     | '#+BEGIN_SRC' … '#+END_SRC'             |
-| <v                     | '#+BEGIN_VERSE' … '#+END_VERSE'         |
-
-https://orgmode.org/manual/Structure-Templates.html
-#+begin_src emacs-lisp
-(require 'org-tempo)
-#+end_src
