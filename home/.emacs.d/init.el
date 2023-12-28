@@ -26,6 +26,9 @@
       (message "Your Emacs v%s is old -- this configuration may not work as expected since Emacs is < v%s." emacs-version minver)
       (load-file "early-init.el"))))
 
+;; Set default Coding System to utf-8
+(set-default-coding-systems 'utf-8)
+
 ;; Load the configuration in the config.org file
 (org-babel-load-file
  (expand-file-name
