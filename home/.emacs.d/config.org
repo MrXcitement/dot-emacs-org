@@ -996,9 +996,10 @@ https://orgmode.org/manual/Structure-Templates.html
 (blink-cursor-mode -1)
 (column-number-mode t)
 (show-paren-mode t)
-(global-display-line-numbers-mode 1)
-(global-visual-line-mode t)
+
+;; Set default display line number to 'relative
 (setq display-line-numbers-type 'relative)
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
 
 ;; Whitespace display configuration
 (setq whitespace-line-column 80 whitespace-style
@@ -1006,9 +1007,7 @@ https://orgmode.org/manual/Structure-Templates.html
 
 ;; Any GUI/TUI configuration
 (defun mrb-after-make-frame-any (&optional frame)
-  "Configure a new FRAME (default: selected frame) on any system"
-
-  (message "mrb-after-make-frame-any")
+  "Configure a new FRAME (default: selected frame) on any system."
 
   ;; comments and keywords italicized
   (set-face-italic 'font-lock-comment-face t)
