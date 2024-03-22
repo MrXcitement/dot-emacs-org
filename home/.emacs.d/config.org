@@ -12,7 +12,7 @@
   - [[#all-the-icons][all-the-icons]]
   - [[#buffer-move-emacsmirror][buffer-move (emacsmirror)]]
   - [[#company][company]]
-  - [[#counsel-ivy-and-swipper][counsel, ivy and swipper]]
+  - [[#consult-embark-orderless-marginalia-vertico][consult, embark, orderless, marginalia, vertico]]
   - [[#dashboard][dashboard]]
   - [[#diminish][diminish]]
   - [[#dired-open-peek-dired][dired-open, peek-dired]]
@@ -24,6 +24,7 @@
   - [[#general][general]]
   - [[#git-timemachine][git-timemachine]]
   - [[#hl-todo][hl-todo]]
+  - [[#ligature][ligature]]
   - [[#magit][magit]]
   - [[#neotree][neotree]]
   - [[#org-bullets][org-bullets]]
@@ -116,9 +117,23 @@ https://github.com/domtronn/all-the-icons.el
 (use-package all-the-icons
   :ensure t
   :if (display-graphic-p))
+#+end_src
+Adds dired support to all-the-icons
 
+https://github.com/jtbm37/all-the-icons-dired
+#+begin_src emacs-lisp
 (use-package all-the-icons-dired
   :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
+#+end_src
+All the icons completion
+
+https://github.com/iyefrat/all-the-icons-completion
+#+begin_src emacs-lisp
+(use-package all-the-icons-completion
+  :after (marginalia all-the-icons)
+  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+  :init
+  (all-the-icons-completion-mode))
 #+end_src
 
 ** buffer-move (emacsmirror)
@@ -154,13 +169,15 @@ https://company-mode.github.io/
   :hook (company-mode . company-box-mode))
 #+end_src
 
-** counsel, ivy and swipper
+** COMMENT counsel, ivy and swipper
+== DISABLED ==
 Flexible, simple tools for minibuffer completion in Emacs
 + Ivy, a generic completion mechanism for Emacs.
 + Counsel, a collection of Ivy-enhanced versions of common Emacs commands.
 + Ivy-rich allows us to add descriptions alongside the commands in M-x.
 
 https://github.com/abo-abo/swiper
+#+begin_comment
 #+begin_src emacs-lisp
 (use-package counsel
   :after ivy
@@ -193,6 +210,302 @@ https://github.com/abo-abo/swiper
    ivy-rich-switch-buffer-align-virtual-buffer t
    ivy-rich-path-style 'abbrev))
 #+end_src
+#+end_comment
+
+** consult, embark, orderless, marginalia, vertico
+*** Configuration for Consult
+https://github.com/minad/consult
+
+#+begin_src emacs-lisp
+(use-package consult
+  ;; Replace bindings. Lazily loaded due by `use-package'.
+  ;; :bind (;; C-c bindings in `mode-specific-map'
+  ;;        ("C-c M-x" . consult-mode-command)
+  ;;        ("C-c h" . consult-history)
+  ;;        ("C-c k" . consult-kmacro)
+  ;;        ("C-c m" . consult-man)
+  ;;        ("C-c i" . consult-info)
+  ;;        ([remap Info-search] . consult-info)
+  ;;        ;; C-x bindings in `ctl-x-map'
+  ;;        ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+  ;;        ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+  ;;        ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+  ;;        ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+  ;;        ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+  ;;        ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+  ;;        ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+  ;;        ;; Custom M-# bindings for fast register access
+  ;;        ("M-#" . consult-register-load)
+  ;;        ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+  ;;        ("C-M-#" . consult-register)
+  ;;        ;; Other custom bindings
+  ;;        ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+  ;;        ;; M-g bindings in `goto-map'
+  ;;        ("M-g e" . consult-compile-error)
+  ;;        ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+  ;;        ("M-g g" . consult-goto-line)             ;; orig. goto-line
+  ;;        ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+  ;;        ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+  ;;        ("M-g m" . consult-mark)
+  ;;        ("M-g k" . consult-global-mark)
+  ;;        ("M-g i" . consult-imenu)
+  ;;        ("M-g I" . consult-imenu-multi)
+  ;;        ;; M-s bindings in `search-map'
+  ;;        ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+  ;;        ("M-s c" . consult-locate)
+  ;;        ("M-s g" . consult-grep)
+  ;;        ("M-s G" . consult-git-grep)
+  ;;        ("M-s r" . consult-ripgrep)
+  ;;        ("M-s l" . consult-line)
+  ;;        ("M-s L" . consult-line-multi)
+  ;;        ("M-s k" . consult-keep-lines)
+  ;;        ("M-s u" . consult-focus-lines)
+  ;;        ;; Isearch integration
+  ;;        ("M-s e" . consult-isearch-history)
+  ;;        :map isearch-mode-map
+  ;;        ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+  ;;        ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+  ;;        ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+  ;;        ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+  ;;        ;; Minibuffer history
+  ;;        :map minibuffer-local-map
+  ;;        ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+  ;;        ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  ;; :hook (completion-list-mode . consult-preview-at-point-mode)
+
+  ;; The :init configuration is always executed (Not lazy)
+  ;; :init
+
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  ;; (setq register-preview-delay 0.5
+  ;;       register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  ;; (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  ;; (setq xref-show-xrefs-function #'consult-xref
+  ;;       xref-show-definitions-function #'consult-xref)
+
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
+  ;; :config
+
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key "M-.")
+  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
+  ;; (consult-customize
+  ;;  consult-theme :preview-key '(:debounce 0.2 any)
+  ;;  consult-ripgrep consult-git-grep consult-grep
+  ;;  consult-bookmark consult-recent-file consult-xref
+  ;;  consult--source-bookmark consult--source-file-register
+  ;;  consult--source-recent-file consult--source-project-recent-file
+  ;;  ;; :preview-key "M-."
+  ;;  :preview-key '(:debounce 0.4 any))
+
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  ;; (setq consult-narrow-key "<") ;; "C-+"
+
+  ;; Optionally make narrowing help available in the minibuffer.
+  ;; You may want to use `embark-prefix-help-command' or which-key instead.
+  ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
+
+  ;; By default `consult-project-function' uses `project-root' from project.el.
+  ;; Optionally configure a different project root function.
+  ;;;; 1. project.el (the default)
+  ;; (setq consult-project-function #'consult--default-project--function)
+  ;;;; 2. vc.el (vc-root-dir)
+  ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+  ;;;; 3. locate-dominating-file
+  ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+  ;;;; 4. projectile.el (projectile-project-root)
+  ;; (autoload 'projectile-project-root "projectile")
+  ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
+  ;;;; 5. No project support
+  ;; (setq consult-project-function nil)
+  )
+
+#+end_src
+*** Embark
+https://github.com/oantolin/embark
+
+#+begin_src emacs-lisp
+(use-package embark
+  :ensure t
+
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+  :init
+
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  ;; Show the Embark target at point via Eldoc. You may adjust the
+  ;; Eldoc strategy, if you want to see the documentation from
+  ;; multiple providers. Beware that using this can be a little
+  ;; jarring since the message shown in the minibuffer can be more
+  ;; than one line, causing the modeline to move up and down:
+
+  ;; (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+  ;; (setq eldoc-documentation-strategy #'eldoc-documentation-compose-eagerly)
+
+  :config
+
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
+#+end_src
+*** Embark Consult package
+https://github.com/oantolin/embark
+Consult users will also want the embark-consult package.
+
+#+begin_src emacs-lisp
+(use-package embark-consult
+  :ensure t ; only need to install it, embark loads it after consult if found
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
+#+end_src
+*** Marginalia package
+https://github.com/minad/marginalia
+
+#+begin_src emacs-lisp
+(use-package marginalia
+  :bind
+  (:map minibuffer-local-map
+        ("M-A" . marginalia-cycle))
+  :custom
+  (marginalia-max-relative-age 0)
+  (marginalia-align 'right)
+  :init
+  (marginalia-mode))
+
+#+end_src
+*** Orderless package
+https://github.com/oantolin/orderless
+
+#+begin_src emacs-lisp
+(use-package orderless
+  :custom
+  (completion-styles '(orderless))
+  (completion-category-defaults nil)    ; I want to be in control!
+;  (completion-category-overrides
+;   '((file (styles basic-remote ; For `tramp' hostname completion with `vertico'
+;                   orderless
+;                   ))
+;     ))
+
+  (orderless-component-separator 'orderless-escapable-split-on-space)
+  (orderless-matching-styles
+   '(orderless-literal
+     orderless-prefixes
+     orderless-initialism
+     orderless-regexp
+     ;; orderless-flex
+     ;; orderless-strict-leading-initialism
+     ;; orderless-strict-initialism
+     ;; orderless-strict-full-initialism
+     ;; orderless-without-literal          ; Recommended for dispatches instead
+     ))
+  (orderless-style-dispatchers
+   '(prot-orderless-literal-dispatcher
+     prot-orderless-strict-initialism-dispatcher
+     prot-orderless-flex-dispatcher
+     ))
+  :init
+  (defun prot-orderless-literal-dispatcher (pattern _index _total)
+    "Literal style dispatcher using the equals sign as a suffix.
+It matches PATTERN _INDEX and _TOTAL according to how Orderless
+parses its input."
+    (when (string-suffix-p "=" pattern)
+      `(orderless-literal . ,(substring pattern 0 -1))))
+
+  (defun prot-orderless-strict-initialism-dispatcher (pattern _index _total)
+    "Leading initialism  dispatcher using the comma suffix.
+It matches PATTERN _INDEX and _TOTAL according to how Orderless
+parses its input."
+    (when (string-suffix-p "," pattern)
+      `(orderless-strict-initialism . ,(substring pattern 0 -1))))
+
+  (defun prot-orderless-flex-dispatcher (pattern _index _total)
+    "Flex  dispatcher using the tilde suffix.
+It matches PATTERN _INDEX and _TOTAL according to how Orderless
+parses its input."
+    (when (string-suffix-p "." pattern)
+      `(orderless-flex . ,(substring pattern 0 -1))))
+  )
+#+end_src
+*** Vertico package
+https://github.com/minad/vertico
+
+#+begin_src emacs-lisp
+(use-package vertico
+  :custom
+  (vertico-count 13)
+  (vertico-resize t)
+  (vertico-cycle nil)
+
+  :init
+  ;; Workaround for problem with `tramp' hostname completions. This overrides
+  ;; the completion style specifically for remote files! See
+  ;; https://github.com/minad/vertico#tramp-hostname-completion
+  (defun mrb-basic-remote-try-completion (string table pred point)
+    (and (vertico--remote-p string)
+         (completion-basic-try-completion string table pred point)))
+  (defun mrb-basic-remote-all-completions (string table pred point)
+    (and (vertico--remote-p string)
+         (completion-basic-all-completions string table pred point)))
+  (add-to-list 'completion-styles-alist
+               '(basic-remote           ; Name of `completion-style'
+                 mrb-basic-remote-try-completion mrb-basic-remote-all-completions nil))
+  (vertico-mode))
+#+end_src
+*** Savehist package
+Vertico sorts by history position, enable =savehist= to persist history over Emacs restarts.
+
+#+begin_src emacs-lisp
+(use-package savehist
+  :init
+  (savehist-mode))
+
+#+end_src
+*** Emacs
+Some more usefull changes to emacs config that helps vertico
+
+#+begin_src emacs-lisp
+(use-package emacs
+  :init
+
+  ;; Do not allow the cursor in the minibuffer prompt
+  (setq minibuffer-prompt-properties
+        '(read-only t cursor-intangible t face minibuffer-prompt))
+  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+
+  ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
+  ;; Vertico commands are hidden in normal buffers.
+  ;; (setq read-extended-command-predicate
+  ;;       #'command-completion-default-include-p)
+
+  ;; Enable recursive minibuffers
+  (setq enable-recursive-minibuffers t))
+#+end_src
 
 ** dashboard
 An extensible emacs startup screen showing you what’s most important.
@@ -210,9 +523,9 @@ https://github.com/emacs-dashboard/emacs-dashboard
   ;;(setq dashboard-startup-banner "/home/dt/.config/emacs/images/emacs-dash.png")  ;; use custom image as banner
   (setq dashboard-center-content nil) ;; set to 't' for centered content
   (setq dashboard-items '((recents . 5)
-                          (agenda . 5 )
+                          (projects . 5)
+                          (agenda . 3)
                           (bookmarks . 3)
-                          (projects . 3)
                           (registers . 3)))
   :custom
   (dashboard-modify-heading-icons '((recents . "file-text")
@@ -357,9 +670,10 @@ https://github.com/noctuid/general.el
     :global-prefix "M-SPC") ;; use ALT-SPC in insert mode to access leader
 
   (mrb-leader-keys
-    "SPC" '(counsel-M-x :wk "Counsel M-x")
+    ;"SPC" '(counsel-M-x :wk "Counsel M-x")
+    "SPC" '(consult-mode-command :wk "Consult Mode Command")
     "." '(find-file :wk "Find file")
-    "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
+    ;; "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
     "TAB TAB" '(comment-line :wk "Comment lines")
     "u" '(universal-argument :wk "Universal argument"))
 
@@ -510,6 +824,7 @@ https://github.com/noctuid/general.el
     "t n" '(neotree-toggle :wk "Toggle neotree file viewer")
     "t o" '(org-mode :wk "Toggle org mode")
     "t r" '(rainbow-mode :wk "Toggle rainbow mode")
+    "t s" '(toggle-frame-fullscreen :wk "Toggle fullscreen")
     "t t" '(visual-line-mode :wk "Toggle truncated lines")
     "t v" '(vterm-toggle :wk "Toggle vterm"))
 
@@ -566,6 +881,43 @@ https://github.com/tarsius/hl-todo
           ("DEPRECATED" font-lock-doc-face bold))))
 #+end_src
 
+** ligature
+Display typographical ligatures in Emacs, plus some code to only load
+the ligiture package if the current emacs supports it.
+
+https://github.com/mickeynp/ligature.el
+https://github.com/d12frosted/homebrew-emacs-plus/pull/371#issuecomment-1277583488
+#+begin_src emacs-lisp
+(use-package ligature
+  ;; Only load this extension if emacs > 27 and running on macos or built with harfbuzz.
+  :if (and (> emacs-major-version 27)
+           (or (featurep 'ns)
+               (string-match-p "HARFBUZZ" system-configuration-features))
+           (featurep 'composite))  ; Emacs loads `composite' at startup
+  :config
+  ;; Enable the "www" ligature in every possible major mode
+  (ligature-set-ligatures 't '("www"))
+  ;; Enable traditional ligature support in eww-mode, if the
+  ;; `variable-pitch' face supports it
+  (ligature-set-ligatures 'eww-mode '("ff" "fi" "ffi"))
+  ;; Enable all Cascadia Code ligatures in programming modes
+  (ligature-set-ligatures 'prog-mode '("|||>" "<|||" "<==>" "<!--" "####" "~~>" "***" "||=" "||>"
+                                       ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
+                                       "!!." ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->" "---" "-<<"
+                                       "<~~" "<~>" "<*>" "<||" "<|>" "<$>" "<==" "<=>" "<=<" "<->"
+                                       "<--" "<-<" "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_(" "..<"
+                                       "..." "+++" "/==" "///" "_|_" "www" "&&" "^=" "~~" "~@" "~="
+                                       "~>" "~-" "**" "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-" "{|"
+                                       "[|" "]#" "::" ":=" ":>" ":<" "$>" "==" "=>" "!=" "!!" ">:"
+                                       ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
+                                       "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
+                                       "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
+                                       "?=" "?." "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
+                                       "\\\\" "://"))
+  ;; Enables ligature checks globally in all buffers. You can also do it
+  ;; per mode with `ligature-mode'.
+  (global-ligature-mode t))
+#+end_src
 ** magit
 Magit is a full-featured git client for Emacs.
 
@@ -575,7 +927,13 @@ https://magit.vc/manual/
 #+end_src
 
 ** neotree
-Neotree is a file tree viewer.  When you open neotree, it jumps to the current file thanks to neo-smart-open.  The neo-window-fixed-size setting makes the neotree width be adjustable.  NeoTree provides following themes: classic, ascii, arrow, icons, and nerd.  Theme can be configed by setting "two" themes for neo-theme: one for the GUI and one for the terminal.  I like to use 'SPC t' for 'toggle' keybindings, so I have used 'SPC t n' for toggle-neotree.
+Neotree is a file tree viewer.  When you open neotree, it jumps to the
+current file thanks to neo-smart-open.  The neo-window-fixed-size
+setting makes the neotree width be adjustable.  NeoTree provides
+following themes: classic, ascii, arrow, icons, and nerd.  Theme can
+be configed by setting "two" themes for neo-theme: one for the GUI and
+one for the terminal.  I like to use 'SPC t' for 'toggle' keybindings,
+so I have used 'SPC t n' for toggle-neotree.
 
 | COMMAND        | DESCRIPTION               | KEYBINDING |
 |----------------+---------------------------+------------|
@@ -618,8 +976,11 @@ Projectile is a project interaction library for Emacs. Its goal is to provide a 
 https://projectile.mx/
 #+begin_src emacs-lisp
 (use-package projectile
+  :bind ("C-c p" . projectile-command-map)
   :config
+  (setq projectile-project-search-path '("~/src/" "~/gitlab/" ("~/github/mrxcitement" . 1)))
   (projectile-mode 1))
+
 #+end_src
 
 ** rainbow-delimeters
@@ -669,13 +1030,13 @@ https://github.com/nflath/sudo-edit
 ** themes
 Install themes for GUI and TUI
 #+begin_src emacs-lisp
+;; (use-package modus-themes)
+
 (use-package vs-dark-theme
-  :if window-system
-  :ensure t)
+  :if window-system)
 
 (use-package vs-light-theme
-  :if window-system
-  :ensure t)
+  :if window-system)
 
 (use-package deeper-blue-theme
   :disabled
@@ -740,24 +1101,25 @@ popup.
 
 https://github.com/justbur/emacs-which-key
 #+begin_src emacs-lisp
-(use-package which-key
-  :init
-  (which-key-mode 1)
-  :diminish
-  :config
-  (setq which-key-side-window-location 'bottom
-        which-key-sort-order #'which-key-key-order-alpha
-        which-key-allow-imprecise-window-fit nil
-        which-key-sort-uppercase-first nil
-        which-key-add-column-padding 1
-        which-key-max-display-columns nil
-        which-key-min-display-lines 6
-        which-key-side-window-slot -10
-        which-key-side-window-max-height 0.25
-        which-key-idle-delay 0.8
-        which-key-max-description-length 25
-        which-key-allow-imprecise-window-fit nil
-        which-key-separator " → " ))
+  (use-package which-key
+    :init
+    (which-key-mode 1)
+    :diminish
+  ;;  :config
+  ;;  (setq which-key-side-window-location 'bottom
+  ;;        which-key-sort-order #'which-key-key-order-alpha
+  ;;        which-key-allow-imprecise-window-fit nil
+  ;;        which-key-sort-uppercase-first nil
+  ;;        which-key-add-column-padding 1
+  ;;        which-key-max-display-columns nil
+  ;;        which-key-min-display-lines 6
+  ;;        which-key-side-window-slot -10
+  ;;        which-key-side-window-max-height 0.25
+  ;;        which-key-idle-delay 0.8
+  ;;        which-key-max-description-length 25
+  ;;        which-key-allow-imprecise-window-fit nil
+  ;;        which-key-separator " → " )
+)
 #+end_src
 
 * Emacs Settings
@@ -936,10 +1298,13 @@ https://orgmode.org/manual/Structure-Templates.html
 (defun mrb-apply-theme (appearance)
   "Load theme, taking current system APPEARANCE into consideration."
   (interactive)
+  (setq modus-themes-mode-line '(accented borderless (padding 2) (height 0.9)))
+  (setq modus-themes-region '(bg-only))
+  (setq modus-themes-completions '((t background intense accented)))
   (mapc #'disable-theme custom-enabled-themes)
   (pcase appearance
-    ('light (load-theme 'vs-light t))
-    ('dark (load-theme 'vs-dark t))))
+    ('light (load-theme 'modus-operandi t))
+    ('dark (load-theme 'modus-vivendi t))))
 
 ;; Apply light theme
 (defun mrb-apply-theme-light ()
@@ -952,13 +1317,6 @@ https://orgmode.org/manual/Structure-Templates.html
   "Apply the dark theme"
   (interactive)
   (mrb-apply-theme 'dark))
-
-(defvar after-load-theme-hook nil
-  "Hook run after a color theme is loaded using `load-theme'.")
-
-(defadvice load-theme (after run-after-load-theme-hook activate)
-  "Run `after-load-theme-hook'."
-  (run-hooks 'after-load-theme-hook))
 
 ;; Customize light theme after load
 (defun mrb-customize-theme-light ()
@@ -976,8 +1334,16 @@ https://orgmode.org/manual/Structure-Templates.html
   (set-face-italic 'font-lock-comment-face t)
   (set-face-italic 'font-lock-keyword-face t)
 
-  (if (member 'vs-light custom-enabled-themes)
+  (if (or (member 'vs-light custom-enabled-themes)
+          (member 'modus-operandi custom-enabled-themes))
       (mrb-customize-theme-light)))
+
+(defvar after-load-theme-hook nil
+  "Hook run after a color theme is loaded using `load-theme'.")
+
+(defadvice load-theme (after run-after-load-theme-hook activate)
+  "Run `after-load-theme-hook'."
+  (run-hooks 'after-load-theme-hook))
 
 ;; When the theme is changed  apply customizations
 (add-hook 'after-load-theme-hook 'mrb-customize-theme)
@@ -1039,7 +1405,7 @@ https://orgmode.org/manual/Structure-Templates.html
     (when (display-graphic-p)
 
       ;; set key to toggle fullscreen mode
-      (global-set-key (kbd "s-<return>") 'toggle-frame-fullscreen)
+      ;; (global-set-key (kbd "s-<return>") 'toggle-frame-fullscreen)
 
       ;; set default fonts
       (when (member "FiraCode Nerd Font" (font-family-list))

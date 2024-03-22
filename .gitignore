@@ -29,6 +29,8 @@ config.el
 custom.el
 ede-projects.el
 ido.last
+history
+projects
 projectile-bookmarks.eld
 recentf
 smex-items
